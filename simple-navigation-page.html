@@ -4,79 +4,377 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能导航</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    </header><!-- 登录按钮样式 -->
+    <style>
+        .login-btn {
+            position: fixed;
+            right: 1rem;
+            top: 1rem;
+            z-index: 50;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            background-color: transparent;
+            color: #3B82F6;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+        .login-btn:hover {
+            color: #2563EB;
+        }
+    </style>
+    <!-- 登录按钮 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginBtn = document.createElement('button');
+            loginBtn.className = 'login-btn';
+            loginBtn.textContent = '🏠';
+            loginBtn.onclick = function() {
+                window.location.href = 'https://studydo.cn';
+            };
+            document.body.appendChild(loginBtn);
+        });
+    </script>
+    
 </head>
 <body class="bg-gray-50">
+    <!-- 侧边栏按钮 -->
+    <button id="sidebar-toggle" class="fixed left-4 top-4 p-2 hover:bg-gray-100 rounded-md transition-colors duration-200 z-50">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-700">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M3 8C3 7.44772 3.44772 7 4 7H20C20.5523 7 21 7.44772 21 8C21 8.55228 20.5523 9 20 9H4C3.44772 9 3 8.55228 3 8ZM3 16C3 15.4477 3.44772 15 4 15H20C20.5523 15 21 15.4477 21 16C21 16.5523 20.5523 17 20 17H4C3.44772 17 3 16.5523 3 16Z" fill="currentColor"/>
+    </svg>
+    </button>
+
+    
+    
+    <script>
+        // 打字效果实现
+        function typeWriter(element, text, speed) {
+            let i = 0;
+            element.textContent = '';
+            function type() {
+                if (i < text.length) {
+                    element.textContent = element.textContent.slice(0, -1); // 移除上一个竖线
+                    element.textContent += text.charAt(i) + '|'; // 添加新字符和竖线
+                    i++;
+                    setTimeout(() => {
+                        // 添加0-0.1秒的随机抖动
+                        const jitter = Math.random() * 40; // 0-100毫秒的随机值
+                        setTimeout(type, speed + jitter);
+                    }, speed/2); // 竖线显示一半时间后消失
+                } else {
+                    element.textContent = element.textContent.slice(0, -1); // 移除最后的竖线
+                }
+            }
+            element.textContent = '|'; // 初始显示竖线
+            setTimeout(type, speed); // 等待一个周期后开始打字
+        }
+    </script>
+
+   
+    <!-- 遮罩层 -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300"></div>
+
     <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 其他内容保持不变... -->
         <header class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">智能导航</h1>
+            
             <div class="relative max-w-md mx-auto">
                 <input 
                     type="text" 
-                    placeholder="搜索网站..."
+                    placeholder="Google"
                     id="search-input"
                     class="w-full px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                
+                <button 
+                    id="search-button"
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="button"
+                    aria-label="搜索">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
             </div>
+
+            <div id="daily-quote" class="text-sm text-gray-500 mt-2 text-center" style="font-family: SimSun, serif;">
+                    <!-- 每日诗词将通过JavaScript动态插入到这里 -->
+            </div>
+                <script>
+                    // 获取每日诗词
+                    fetch('https://v2.jinrishici.com/one.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            const quoteElement = document.getElementById('daily-quote');
+                            typeWriter(quoteElement, data.data.content, 100);
+                            setInterval(() => {
+                                typeWriter(quoteElement, data.data.content, 100);
+                            }, data.data.content.length * 100 + 3000);
+                        })
+                        .catch(console.error);
+                </script>
         </header>
+<g class="jsx-1216535431 parallax"><use href="#gentle-wave" x="48" y="0" class="jsx-1216535431"></use><use href="#gentle-wave" x="48" y="3" class="jsx-1216535431"></use><use href="#gentle-wave" x="48" y="5" class="jsx-1216535431"></use><use href="#gentle-wave" x="48" y="7" class="jsx-1216535431"></use></g>
+    <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">效率工具</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <a href="https://new.oaifree.com/" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                 <img src="https://cdn.oaifree.com/assets/favicon-o20kmmos.svg" alt="ChatGPT Logo" class="w-8 h-8 mr-4">
+                <span class="font-medium text-gray-800">ChatGPT</span>
+            </a>
+            <a href="https://claude.ai" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <img src="https://demo.fuclaude.com/favicon.ico" alt="Claude Logo" class="w-8 h-8 mr-4">
+                <span class="font-medium text-gray-800">Claude</span>
+            </a>
+            <a href="https://yuque.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <img src="https://mdn.alipayobjects.com/huamei_0prmtq/afts/img/A*sRUdR543RjcAAAAAAAAAAAAADvuFAQ/original" alt="Yuque Logo" class="w-8 h-8 mr-4">
+                <span class="font-medium text-gray-800">语雀</span>
+            </a>
+            
+            <a href="https://nav.linux.do/" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🐧</span>
+                <span class="font-medium text-gray-800">linux do</span>
+            </a>
 
-        <main>
-            <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">效率工具</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <a href="https://chat.openai.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">🤖</span>
-                        <span class="font-medium text-gray-800">ChatGPT</span>
-                    </a>
-                    <a href="https://claude.ai" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">🧠</span>
-                        <span class="font-medium text-gray-800">Claude</span>
-                    </a>
-                    <a href="https://notion.so" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">📝</span>
-                        <span class="font-medium text-gray-800">Notion</span>
-                    </a>
-                </div>
-            </section>
+            <a href="https://lib.doc110.com/#/login" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">📚</span>
+                <span class="font-medium text-gray-800">图书馆</span>
+            </a>
+        </div>
+    </section>
 
-            <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">设计资源</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <a href="https://figma.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">🎨</span>
-                        <span class="font-medium text-gray-800">Figma</span>
-                    </a>
-                    <a href="https://dribbble.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">🖌️</span>
-                        <span class="font-medium text-gray-800">Dribbble</span>
-                    </a>
-                    <a href="https://behance.net" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
-                        <span class="text-3xl mr-4">✏️</span>
-                        <span class="font-medium text-gray-800">Behance</span>
-                    </a>
-                </div>
-            </section>
-        </main>
+    <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">我的网站</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <a href="https://chat.uiobot.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                 <img src="https://openwebui.com/favicon.png" alt="webui Logo" class="w-8 h-8 mr-4">
+                <span class="font-medium text-gray-800">open webui</span>
+            </a>
+            <a href="https://token.uiobot.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🚘</span>
+                <span class="font-medium text-gray-800">rf2at</span>
+            </a>
+            <a href="https://shop.uiobot.com" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🛒</span>
+                <span class="font-medium text-gray-800">小商店</span>
+            </a>
+             
+            <a href="https://proxy.uiobot.com/proxy/" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🚌</span>
+                <span class="font-medium text-gray-800">穿梭巴士</span>
+            </a>
+
+            <a href="https://docker.663123.xyz" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🐋</span>
+                <span class="font-medium text-gray-800">Docker镜像</span>
+            </a>
+
+            <a href="https://alist.uiobot.com/" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <span class="text-3xl mr-4">🎞️</span>
+                <span class="font-medium text-gray-800">Alist</span>
+            </a>
+        </div> 
+    </section>
+
+    <section id="custom-links" class="mb-8">
+        <!-- 自定义链接将在这里动态添加 -->
+    </section>
+</main>
 
         <footer class="mt-12 text-center text-gray-500">
-            <p>© 2024 智能导航 | 收藏夹管理</p>
+            <p>© 2024 智能导航 | 收藏夹管理 | 联系邮箱：admin@uiobot.com</p>
+            <div id="website-stats" class="mt-4 text-sm">
+                <p>网页访问量: <script type="text/javascript" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_value_site_pv"></span> </p>
+            </div>
         </footer>
     </div>
 
-    <script>
-        // 简单的搜索功能
-        document.getElementById('search-input').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const cards = document.querySelectorAll('a');
+    <!-- 改进后的侧边栏 -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="h-full flex flex-col">
+            <div class="p-6 border-b">
+                <h3 class="text-xl font-semibold text-gray-800">管理链接</h3>
+            </div>
             
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+            <div class="p-6 flex-grow overflow-y-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label for="link-name" class="block text-sm font-medium text-gray-700 mb-1">链接名称</label>
+                        <input type="text" id="link-name" placeholder="输入链接名称" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="link-url" class="block text-sm font-medium text-gray-700 mb-1">链接地址</label>
+                        <input type="text" id="link-url" placeholder="输入链接地址" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button id="add-link" 
+                            class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        添加链接
+                    </button>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">已添加的链接</h4>
+                    <ul id="link-list" class="space-y-2">
+                        <!-- 链接列表将在这里动态添加 -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const overlay = document.getElementById('overlay');
+            const linkName = document.getElementById('link-name');
+            const linkUrl = document.getElementById('link-url');
+            const addLinkBtn = document.getElementById('add-link');
+            const linkList = document.getElementById('link-list');
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+
+            // 打开侧边栏
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.add('opacity-100');
+                }, 0);
+            }
+
+            // 关闭侧边栏
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+
+            // 侧边栏切换事件
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
             });
+
+            // 点击遮罩层关闭侧边栏
+            overlay.addEventListener('click', closeSidebar);
+
+            // 搜索功能
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const cards = document.querySelectorAll('a');
+                
+                cards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                });
+            });
+
+            // 从本地存储加载链接
+            function loadLinks() {
+                const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+                linkList.innerHTML = '';
+                links.forEach((link, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center justify-between p-2 hover:bg-gray-50 rounded-md';
+                    li.innerHTML = `
+                        <span class="text-gray-700">${link.name}</span>
+                        <button class="delete-link text-red-500 hover:text-red-700 focus:outline-none" data-index="${index}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    `;
+                    linkList.appendChild(li);
+                });
+                updateMainContent();
+            }
+
+            // 更新主页内容
+            function updateMainContent() {
+                const customLinksSection = document.getElementById('custom-links');
+                const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+                
+                if (links.length > 0) {
+                    customLinksSection.innerHTML = `
+                        <h2 class="text-2xl font-semibold text-gray-700 mb-4">自定义链接</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            ${links.map(link => `
+                                <a href="${link.url}" target="_blank" class="bg-white shadow-md rounded-lg p-4 flex items-center hover:shadow-lg transition-all duration-300 hover:scale-105">
+                                    <span class="text-3xl mr-4">🔗</span>
+                                    <span class="font-medium text-gray-800">${link.name}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    customLinksSection.innerHTML = '';
+                }
+            }
+
+            // 添加链接
+            addLinkBtn.addEventListener('click', () => {
+                if (linkName.value && linkUrl.value) {
+                    let url = linkUrl.value;
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'https://' + url;
+                    }
+                    
+                    const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+                    links.push({ name: linkName.value, url });
+                    localStorage.setItem('customLinks', JSON.stringify(links));
+                    loadLinks();
+                    
+                    linkName.value = '';
+                    linkUrl.value = '';
+                }
+            });
+
+            // 删除链接
+            linkList.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-link');
+                if (deleteButton) {
+                    const index = deleteButton.dataset.index;
+                    const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+                    links.splice(index, 1);
+                    localStorage.setItem('customLinks', JSON.stringify(links));
+                    loadLinks();
+                }
+            });
+
+            // 搜索功能
+            searchButton.addEventListener('click', function() {
+                const searchTerm = searchInput.value;
+                if (searchTerm.trim() !== '') {
+                    const searchUrl = `https://google.uiobot.com/search?q=${encodeURIComponent(searchTerm)}`;
+                    window.location.href = searchUrl;
+                }
+            });
+
+            // 回车搜索
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+
+            // 初始加载
+            loadLinks();
         });
     </script>
 </body>
